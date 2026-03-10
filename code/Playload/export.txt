@@ -1,0 +1,5 @@
+pip install pyinstaller
+pyinstaller -F yourprogram.py
+
+
+pyinstaller -F Payload.py
