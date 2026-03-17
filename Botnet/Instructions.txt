@@ -1,0 +1,15 @@
+To turn the python script into a standalone  do the following:
+
+# Basic build
+pyinstaller --onefile bot/main.py
+
+# With a custom name and no console window (cleaner for demo)
+pyinstaller --onefile --noconsole --name "BNSBot" bot/main.py
+
+
+Output will be in the dist/ folder.
+Tips for PyInstaller:
+
+If you use extra files (configs, icons), use --add-data
+Test the .exe on a clean VM — missing dependencies only show up there
+Add --icon=icon.ico for a polished look during the demo
