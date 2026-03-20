@@ -38,7 +38,7 @@ def handle_startup_bot():
 if __name__ == "__main__":
     notification = ctypes.windll.user32.MessageBoxW
     notification.restype = ctypes.c_int
-
+    
     becomeBot = ask_to_become_bot()
     if becomeBot:
         handle_startup_bot()
