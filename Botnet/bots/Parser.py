@@ -26,11 +26,11 @@ class Parser:
         return command
 
     # Parse the command received from the C2 server, return a tuple containing the command, id, and parameters
-    def parse_command(self, to_parse: Response):
-        cmd_str = self.__parse_html(to_parse)
+    def parse_command(self, to_parse: str):
+        # cmd_str = self.__parse_html(to_parse)
 
         try:
-            parts = cmd_str.split(":")
+            parts = to_parse.split(":")
             cmd = parts[0]
             id = parts[1] if len(parts) > 1 else None
             params = parts[2:] if len(parts) > 2 else []
