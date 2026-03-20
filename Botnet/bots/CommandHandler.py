@@ -12,7 +12,7 @@ from bots.MachineInfo import MachineInfo
 from bots.ExecutingProgramHandler import ExecutingProgramHandler
 from bots.NotificationBuilder import NotificationBuilder
 
-# Imprort Dictionaries
+# Import Dictionaries
 from bots.dictionaries.NotficationEvents import Events
 from bots.dictionaries.CommunicationChannels import CommChannels
 
