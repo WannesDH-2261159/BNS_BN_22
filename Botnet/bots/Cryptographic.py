@@ -17,8 +17,8 @@ class Cryptographic:
         self.key = base64.urlsafe_b64encode(self.kdf.derive(self.psswd))
         self.f = Fernet(self.key)
 
-    def encrypt(self, data):
-        return self.f.encrypt(data.encode())
+    def encrypt(self, data: str):
+        return self.f.encrypt(data.encode(encoding='utf-8')).decode()
 
-    def decrypt(self, data):
-        return self.f.decrypt(data.decode())
+    def decrypt(self, data: str):
+        return self.f.decrypt(data.encode(encoding='utf-8')).decode()

