@@ -29,30 +29,6 @@ class Bot:
         return (tpl[0].lower(), tpl[1].lower() if tpl[1] else None, tpl[2])
 
 
-    # Check periodically for new commands from C2 server and execute them
-    def __track_C2(self):
-        while not self.quit:
-            time.sleep(30)  # Sleep for 30 seconds
-
-            result = self.listener.pull_commands()  # Pull commands from C2 server
-            result = self.__to_lower_case(result)
-            print(result)
-
-            if (result[0] == self.previous_command):
-                continue
-            
-            self.__update_command(result[0])
-            self.handler.handle_command(result)
-
     def handle_command(self, command):
         command = self.__to_lower_case(command)
         self.handler.handle_command(command)
-
-
-    # Update command if it's different from the previous one, return True if updated, False if same
-    def __update_command(self, new_command):
-        if new_command == self.previous_command:
-            return False
-        else:
-            self.previous_command = new_command
-            return True
