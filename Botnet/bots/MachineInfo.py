@@ -6,7 +6,7 @@ class MachineInfo:
 
     def __init_machine_info(self):
         # DEVICE ID
-        self.MAC_ADDR = "00:1A:2B:3C:4D:5E"  # Placeholder for MAC address retrieval logic
+        self.MAC_ADDR = "00:1A:2B:3C:4D:5X"  # Placeholder for MAC address retrieval logic
         self.IP_ADDR = "192.168.1.100"  # Placeholder for IP address retrieval logic
 
         # DEVICE INFO

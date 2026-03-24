@@ -7,6 +7,7 @@ from bots.dictionaries.NotficationEvents import Events
 class NotificationBuilder:
     def __init__(self, crypt: Cryptographic):
         self.crypt = crypt
+        self.__started = False
 
     def build_status_notification(self, data: tuple, event: str = "Rebooting..."):
         MAC = data["MAC_ADDR"]
@@ -32,6 +33,10 @@ class NotificationBuilder:
 
     def build_notification(self, data: str, type: Command):
         if type == Command.STATUS:
-            return self.build_status_notification(data, Events["START"])
+            if not self.__started:
+                self.__started = True
+                return self.build_status_notification(data, Events["START"])
+            else:
+                return self.build_status_notification(data, Events["REBOOT"])
         else:
             return "UNKNOWN COMMAND"

