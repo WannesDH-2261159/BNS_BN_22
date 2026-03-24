@@ -18,6 +18,7 @@ from bots.dictionaries.CommunicationChannels import CommChannels
 
 # Handles the recieved commands from the C2 server and executes the corresponding actions on the bot's system
 class CommandHandler:
+    """ --- PRIVATE METHODS --- """
     def __init__(self, bot, crypt):
         self.bot = bot
         self.crypt = crypt
@@ -131,6 +132,8 @@ class CommandHandler:
             func(id, params)
         else:
             pass        
+
+    """ --- PUBLIC METHODS --- """
 
     # Handle commands received from C2 server
     def handle_command(self, cmd_tuple):

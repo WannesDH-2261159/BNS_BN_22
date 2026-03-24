@@ -2,7 +2,7 @@ import subprocess
 
 # Handles the tracking of currently executing programs on the bot's system, allowing for management and monitoring of active processes
 class ExecutingProgramHandler:
-    # Private methods:
+    """ --- PRIVATE METHODS --- """
     def __init__(self):
         self.__execPrograms = {}
 
@@ -17,23 +17,17 @@ class ExecutingProgramHandler:
             print(f"Error stopping program: {e}")
 
 
-    # Public methods:
+    """ --- PUBLIC METHODS --- """
     def stop_all_programs(self):
-        print("Stopping programs...")
-
         for prgrm in self.__execPrograms.values():
             self.__kill_program(prgrm)
         self.__execPrograms.clear()
 
 
     def stop_program(self, name: str):
-        print("Stop specific program")
-
-        print(self.__execPrograms.keys())
         prgrm = self.__execPrograms.get(name)
         self.__kill_program(prgrm)
         self.__execPrograms.pop(name)
-        print(self.__execPrograms.keys())
 
 
     def add_program(self, id, name: str):
