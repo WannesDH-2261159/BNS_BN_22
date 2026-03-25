@@ -1,13 +1,17 @@
 import platform
+import socket
+import uuid
 
 class MachineInfo:
     def __init__(self):
         self.__init_machine_info()
+        # self.IP_ADDR = "192.168.1.101"  # Placeholder
+        # self.MAC_ADDR = "00:1A:2B:3C:4D:5X"  # Placeholder
 
     def __init_machine_info(self):
         # DEVICE ID
-        self.MAC_ADDR = "00:1A:2B:3C:4D:5X"  # Placeholder for MAC address retrieval logic
-        self.IP_ADDR = "192.168.1.101"  # Placeholder for IP address retrieval logic
+        self.MAC_ADDR = hex(uuid.getnode())
+        self.IP_ADDR = socket.gethostbyname(socket.gethostname())
 
         # DEVICE INFO
         self.ARCHITECTURE = platform.machine()
