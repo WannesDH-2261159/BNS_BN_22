@@ -9,7 +9,8 @@ class NotificationBuilder:
         self.crypt = crypt
         self.__started = False
 
-    def build_status_notification(self, data: tuple, event: str = "Rebooting..."):
+
+    def build_status_notification(self, data: tuple, prgrms: list, event: str = "Rebooting..."):
         MAC = data["MAC_ADDR"]
         IP = data["IP_ADDR"]
         OS_NAME = data["OS_NAME"]
@@ -23,20 +24,25 @@ class NotificationBuilder:
 
         lines = [
             f"{event}",
-            "",
             f"  Device ID : {DeviceID}",
             f"  OS        : {OS_NAME} {OS_VERSION}",
             f"  Arch      : {ARCHITECTURE}",
             f"  CPU       : {CPU_INFO}",
         ]
+
+        if len(prgrms) > 0:
+            lines.append("Running Programs:")
+            for p in prgrms:
+                lines.append(f"- {p}")
+
         return "\n".join(lines)
 
-    def build_notification(self, data: str, type: Command):
+    def build_notification(self, data: str, prgrms: list, type: Command):
         if type == Command.STATUS:
             if not self.__started:
                 self.__started = True
-                return self.build_status_notification(data, Events["START"])
+                return self.build_status_notification(data, prgrms, Events["START"])
             else:
-                return self.build_status_notification(data, Events["REBOOT"])
+                return self.build_status_notification(data, prgrms, Events["REBOOT"])
         else:
             return "UNKNOWN COMMAND"

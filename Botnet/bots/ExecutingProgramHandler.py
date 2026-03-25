@@ -18,6 +18,11 @@ class ExecutingProgramHandler:
 
 
     """ --- PUBLIC METHODS --- """
+    # Return a list of program names
+    def get_running_programs(self):
+        return self.__execPrograms.keys()
+
+
     def stop_all_programs(self):
         for prgrm in self.__execPrograms.values():
             self.__kill_program(prgrm)
