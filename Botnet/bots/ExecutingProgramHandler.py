@@ -25,13 +25,19 @@ class ExecutingProgramHandler:
 
     def stop_all_programs(self):
         for prgrm in self.__execPrograms.values():
-            self.__kill_program(prgrm)
+            try:
+                self.__kill_program(prgrm)
+            except Exception as e:
+                print (f"Error stopping prgrm {e}")
         self.__execPrograms.clear()
 
 
     def stop_program(self, name: str):
         prgrm = self.__execPrograms.get(name)
-        self.__kill_program(prgrm)
+        try:
+            self.__kill_program(prgrm)
+        except Exception as e:
+            print (f"Error stopping prgrm {e}")
         self.__execPrograms.pop(name)
 
 
